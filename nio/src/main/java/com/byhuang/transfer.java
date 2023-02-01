@@ -7,7 +7,7 @@ import java.nio.channels.FileChannel;
  * @author mskj-huangbingyi
  * @version 1.0
  * @date 2023/2/1 18:40
- * @description TODO
+ * @description channel之间传输
  */
 public class transfer {
 
