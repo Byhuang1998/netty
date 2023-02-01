@@ -1,4 +1,4 @@
-package com.byhuang.net;
+package com.byhuang.net.blockmode;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
