@@ -12,7 +12,7 @@ import java.util.List;
  * @author huangbingyi
  * @version 1.0
  * @date 2023/2/1 22:33
- * @description 服务端
+ * @description 服务端-单线程非阻塞模式
  */
 public class Server {
 

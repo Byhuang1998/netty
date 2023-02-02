@@ -12,8 +12,7 @@ import java.util.List;
  * @author huangbingyi
  * @version 1.0
  * @date 2023/2/1 20:29
- * @description 使用nio来理解阻塞模式
- * @description 服务端
+ * @description 服务端-单线程阻塞模式
  */
 public class Server {
 
