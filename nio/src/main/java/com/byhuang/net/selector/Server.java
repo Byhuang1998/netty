@@ -2,9 +2,8 @@ package com.byhuang.net.selector;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
 import java.util.Iterator;
 
 /**
@@ -40,10 +39,27 @@ public class Server {
             while (iterator.hasNext()) {
                 SelectionKey key = iterator.next();
                 System.out.println("key: " + key);
-                ServerSocketChannel channel = (ServerSocketChannel) key.channel();
-                channel.accept();
-                System.out.println("channel: " + channel);
-                // key.cancel();
+
+                if (key.isAcceptable()) {
+
+                    ServerSocketChannel channel = (ServerSocketChannel) key.channel();
+                    SocketChannel sc = channel.accept();
+                    sc.configureBlocking(false);
+                    System.out.println("channel: " + channel);
+                    SelectionKey scKey = sc.register(selector, 0, null);
+                    scKey.interestOps(SelectionKey.OP_READ);
+                    // key.cancel();
+                } else if (!key.isReadable()) {
+                    SocketChannel channel = (SocketChannel) key.channel();
+                    ByteBuffer buffer = ByteBuffer.allocate(8);
+                    channel.read(buffer);
+                    buffer.flip();
+                    while (buffer.hasRemaining()) {
+                        System.out.print(buffer.get());
+                    }
+                }
+
+
             }
 
         }
