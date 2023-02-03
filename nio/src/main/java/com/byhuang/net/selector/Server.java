@@ -38,6 +38,9 @@ public class Server {
             Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
             while (iterator.hasNext()) {
                 SelectionKey key = iterator.next();
+                // 处理key时，要从selectedKeys集合中删除，否则下次处理就会有问题
+                // selectedKeys集合是发生了事件的集合，所以每次循环要把之前发生事件的key清除掉
+                iterator.remove();
                 System.out.println("key: " + key);
 
                 if (key.isAcceptable()) {
@@ -49,13 +52,22 @@ public class Server {
                     SelectionKey scKey = sc.register(selector, 0, null);
                     scKey.interestOps(SelectionKey.OP_READ);
                     // key.cancel();
-                } else if (!key.isReadable()) {
-                    SocketChannel channel = (SocketChannel) key.channel();
-                    ByteBuffer buffer = ByteBuffer.allocate(8);
-                    channel.read(buffer);
-                    buffer.flip();
-                    while (buffer.hasRemaining()) {
-                        System.out.print(buffer.get());
+                } else if (key.isReadable()) {
+                    try {
+                        SocketChannel channel = (SocketChannel) key.channel();
+                        ByteBuffer buffer = ByteBuffer.allocate(8);
+                        int read = channel.read(buffer);
+                        if (read == -1) {
+                            key.cancel();
+                        } else {
+                            buffer.flip();
+                            while (buffer.hasRemaining()) {
+                                System.out.print(buffer.get());
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        key.cancel(); // 因为客户端断开了，因此需要将key取消（从selector的keys集合中真正删除key）
                     }
                 }
 
