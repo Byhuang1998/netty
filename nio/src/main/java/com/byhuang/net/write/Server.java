@@ -18,7 +18,7 @@ public class Server {
     public static void main(String[] args) throws IOException {
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 30000000; i++) {
+        for (int i = 0; i < 10000000; i++) {
             sb.append('a');
         }
         ServerSocketChannel ssc = ServerSocketChannel.open();
@@ -37,10 +37,22 @@ public class Server {
                 if (key.isAcceptable()) {
                     SocketChannel socketChannel = ssc.accept();
                     socketChannel.configureBlocking(false);
+                    socketChannel.register(selector, 0, null);
                     ByteBuffer buffer = Charset.defaultCharset().encode(sb.toString());
-                    while (buffer.hasRemaining()) {
-                        int write = socketChannel.write(buffer);
-                        System.out.println(write);
+                    int write = socketChannel.write(buffer);
+                    System.out.println(write);
+                    if (buffer.hasRemaining()) {
+                        key.interestOps(key.interestOps() + SelectionKey.OP_WRITE);
+                        key.attach(buffer);
+                    }
+                } else if (key.isWritable()) {
+                    ByteBuffer buffer = (ByteBuffer) key.attachment();
+                    SocketChannel channel = (SocketChannel) key.channel();
+                    int write = channel.write(buffer);
+                    System.out.println(write);
+                    if (!buffer.hasRemaining()) {
+                        key.attach(null);
+                        key.interestOps(key.interestOps() - SelectionKey.OP_WRITE);
                     }
                 }
             }
